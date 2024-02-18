@@ -24,7 +24,7 @@ app.post('/login', async (req, res) => {
   }
 
   try {
-    const query = `SELECT username, password, userTypeName FROM user, userType WHERE username = ? AND password = ? AND user.idUserType = userType.idUserType AND userStatus = 'ACTIVO'`;
+    const query = `SELECT idUser, username, password, userTypeName FROM user, userType WHERE username = ? AND password = ? AND user.idUserType = userType.idUserType AND userStatus = 'ACTIVO'`;
     const [result] = await db.query(query, [user, pass]);
 
     if (result.length === 0) {

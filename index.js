@@ -1,8 +1,11 @@
 const express = require("express");
 const app = new express();
+const cors = require("cors");
 
 const db = require('./config/config_db');
+const { render } = require("ejs");
 
+app.use(cors());
 
 app.listen(3000, () => {
   console.log("Server is running on port 3000");
@@ -11,27 +14,27 @@ app.listen(3000, () => {
 
 app.use(express.urlencoded({ extended: true }));//Para poder recibir datos de un formulario
 
-app.get("/", (req, res) => {
-    console.log(db);
-//   res.send("<h1>Funciona</h1>");
-});
+app.use(express.json());//Para poder recibir datos en formato JSON 
 
-app.get("/ver", (req, res) => {
-  db.query('SELECT * FROM user').then(([rows, fields]) => {
-    console.log(rows);
-    res.send(rows);
-  }).catch((err) => {
-    console.log(err);
-  });
-});
+app.post('/login', async (req, res) => {
+  const { user, pass } = req.body;
 
-
-app.post("/agregar", (req, res) => {
-  const contact = {
-    nombre : req.body.nombre,
-    numero : req.body.numero,
-    direccion : req.body.direccion,
-    telefono : req.body.telefono,
+  if(!user || !pass){
+    res.status(400).json({ message: "Faltan datos" });
   }
-  res.redirect("/");
+
+  try {
+    const query = `SELECT username, password, userTypeName FROM user, userType WHERE username = ? AND password = ? AND user.idUserType = userType.idUserType AND userStatus = 'ACTIVO'`;
+    const [result] = await db.query(query, [user, pass]);
+
+    if (result.length === 0) {
+      return res.status(400).json({ message: "Usuario o contraseña incorrectos" });
+    }
+
+    res.status(200).json(result[0]);
+    render
+  } catch (error) {
+    console.error("Error during login:", error);
+    res.status(500).json({ message: "Error en la base de datos" });
+  }
 });

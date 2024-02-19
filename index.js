@@ -18,8 +18,8 @@ app.use(express.json());//Para poder recibir datos en formato JSON
 app.post('/login', async (req, res) => {
   const { user, pass } = req.body;
 
-  if(!user || !pass){
-    res.status(400).json({ message: "Faltan datos" });
+  if (!user || !pass) {
+    return res.status(400).json({ message: "Faltan datos" });
   }
 
   try {
@@ -31,7 +31,7 @@ app.post('/login', async (req, res) => {
     }
 
     res.status(200).json(result[0]);
-    
+
   } catch (error) {
     console.error("Error during login:", error);
     res.status(500).json({ message: "Error en la base de datos" });

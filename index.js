@@ -3,7 +3,6 @@ const app = new express();
 const cors = require("cors");
 
 const db = require('./config/config_db');
-const { render } = require("ejs");
 
 app.use(cors());
 
@@ -32,7 +31,7 @@ app.post('/login', async (req, res) => {
     }
 
     res.status(200).json(result[0]);
-    render
+    
   } catch (error) {
     console.error("Error during login:", error);
     res.status(500).json({ message: "Error en la base de datos" });

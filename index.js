@@ -37,3 +37,33 @@ app.post('/login', async (req, res) => {
     res.status(500).json({ message: "Error en la base de datos" });
   }
 });
+
+app.get('/inventory', async (req, res) => {
+  try {
+    const query = `SELECT * FROM product a INNER JOIN unit b on a.idUnit = b.idUnit ORDER BY idProduct ASC`;
+    const [result] = await db.query(query);
+
+    res.status(200).json(result);
+
+  } catch (error) {
+    console.error("Error during fetching inventory:", error);
+    res.status(500).json({ message: "Error en la base de datos" });
+  }
+});
+app.put('/updateInventoryAmount', async (req, res) => {
+  const { idProduct, minimumAmount } = req.body;
+
+  if (!idProduct || minimumAmount === undefined) {
+    return res.status(400).json({ message: "Faltan datos" });
+  }
+  try {
+    const query = `UPDATE product SET minimumAmount = ? WHERE idProduct = ?`;
+    await db.query(query, [minimumAmount, idProduct]);
+
+    res.status(200).json({ message: "Producto actualizado con éxito" });
+
+  } catch (error) {
+    console.error("Error during product update:", error);
+    res.status(500).json({ message: "Error en la base de datos" });
+  }
+});

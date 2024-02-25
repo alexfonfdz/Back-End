@@ -137,10 +137,6 @@ app.put('/updateProduct/:id', async (req, res) => {
   }
 });
 
-
-
-
-
 app.delete('/deleteProduct/:id', async (req, res) => {
   try {
     const { id } = req.params;

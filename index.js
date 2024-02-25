@@ -37,3 +37,125 @@ app.post('/login', async (req, res) => {
     res.status(500).json({ message: "Error en la base de datos" });
   }
 });
+
+app.get('/inventory', async (req, res) => {
+  try {
+    const query = `SELECT * FROM product a INNER JOIN unit b on a.idUnit = b.idUnit ORDER BY idProduct ASC`;
+    const [result] = await db.query(query);
+
+    res.status(200).json(result);
+
+  } catch (error) {
+    console.error("Error during fetching inventory:", error);
+    res.status(500).json({ message: "Error en la base de datos" });
+  }
+});
+
+app.put('/updateInventoryAmount', async (req, res) => {
+  const { idProduct, minimumAmount } = req.body;
+
+  if (!idProduct || minimumAmount === undefined) {
+    return res.status(400).json({ message: "Faltan datos" });
+  }
+  try {
+    const query = `UPDATE product SET minimumAmount = ? WHERE idProduct = ?`;
+    await db.query(query, [minimumAmount, idProduct]);
+
+    res.status(200).json({ message: "Producto actualizado con éxito" });
+
+  } catch (error) {
+    console.error("Error during product update:", error);
+    res.status(500).json({ message: "Error en la base de datos" });
+  }
+});
+
+
+
+//CRUD de la sección de productos
+
+app.get('/products', async(req,res) =>{
+  try {
+    const query = `SELECT idProduct, productName, productPrice, productAmount FROM product;`;
+    const [result] = await db.query(query);
+
+    res.status(200).json(result);
+
+  } catch (error) {
+    console.error("Error al obtener productos:", error);
+    res.status(500).json({ message: "Error en la base de datos" });
+  }
+});
+
+
+
+app.post('/insertProduct', async (req, res) => {
+  try {
+      const { productName, productPrice, productAmount, idProductType, idUnit, minimumAmount } = req.body;
+
+      // Verificar si todos los campos requeridos están presentes en la solicitud
+      if (!productName || !productPrice || !productAmount || !idProductType || !idUnit || !minimumAmount) {
+          return res.status(400).json({ message: 'Todos los campos son obligatorios.' });
+      }
+
+      const query = `
+          INSERT INTO product (idProductType, idUnit, productName, productAmount, minimumAmount, productPrice)
+          VALUES (?, ?, ?, ?, ?, ?);
+      `;
+      const result = await db.query(query, [idProductType, idUnit, productName, productAmount, minimumAmount, productPrice]);
+
+      const insertedId = result.insertId;
+
+      res.status(200).json({ message: 'Producto insertado correctamente.', insertedId });
+  } catch (error) {
+      console.error("Error al insertar producto:", error);
+      res.status(500).json({ message: "Error al insertar el producto en la base de datos" });
+  }
+});
+
+
+
+app.put('/updateProduct/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { productName, productPrice, productAmount } = req.body;
+
+    if (!productName || !productPrice || !productAmount) {
+      return res.status(400).json({ message: 'Todos los campos son obligatorios.' });
+    }
+
+    const query = `
+      UPDATE product
+      SET productName = ?, productPrice = ?, productAmount = ?
+      WHERE idProduct = ?;
+    `;
+    await db.query(query, [productName, productPrice, productAmount, id]);
+
+    res.status(200).json({ message: 'Producto modificado correctamente.' });
+  } catch (error) {
+    console.error("Error al actualizar producto:", error);
+    res.status(500).json({ message: "Error al actualizar el producto en la base de datos" });
+  }
+});
+
+
+
+
+
+app.delete('/deleteProduct/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const query = `
+      DELETE FROM product
+      WHERE idProduct = ?;
+    `;
+    await db.query(query, [id]);
+
+    res.status(200).json({ message: 'Producto eliminado correctamente.' });
+  } catch (error) {
+    console.error("Error al eliminar producto:", error);
+    res.status(500).json({ message: "Error al eliminar el producto de la base de datos" });
+  }
+});
+
+

@@ -38,9 +38,13 @@ app.post('/login', async (req, res) => {
   }
 });
 
+//funcion para obtener el inventario
 app.get('/inventory', async (req, res) => {
   try {
-    const query = `SELECT * FROM product a INNER JOIN unit b on a.idUnit = b.idUnit ORDER BY idProduct ASC`;
+    const query = `SELECT * FROM product a 
+    INNER JOIN unit b on a.idUnit = b.idUnit 
+    INNER JOIN producttype c on a.idProductType = c.idProductType 
+    ORDER BY idProduct ASC`;
     const [result] = await db.query(query);
 
     res.status(200).json(result);
@@ -50,6 +54,8 @@ app.get('/inventory', async (req, res) => {
     res.status(500).json({ message: "Error en la base de datos" });
   }
 });
+
+//funcion para actualizar la cantidad minima de un producto
 app.put('/updateInventoryAmount', async (req, res) => {
   const { idProduct, minimumAmount } = req.body;
 
@@ -64,6 +70,25 @@ app.put('/updateInventoryAmount', async (req, res) => {
 
   } catch (error) {
     console.error("Error during product update:", error);
+    res.status(500).json({ message: "Error en la base de datos" });
+  }
+});
+
+//Funcion para agregar un producto
+app.post('/addInventoryProduct', async (req, res) => {
+  const { idProduct, idProductType, idUnit, productName, productAmount, minimumAmount, productPrice } = req.body;
+
+  if (!idProduct || !idProductType || !idUnit || !productName || productAmount === undefined || minimumAmount === undefined || productPrice === undefined) {
+    return res.status(400).json({ message: "Faltan datos" });
+  }
+  try {
+    const query = `INSERT INTO product (idProduct, idProductType, idUnit, productName, productAmount, minimumAmount, productPrice) VALUES (?, ?, ?, ?, ?, ?, ?)`;
+    await db.query(query, [idProduct, idProductType, idUnit, productName, productAmount, minimumAmount, productPrice]);
+
+    res.status(200).json({ message: "Producto agregado con éxito" });
+
+  } catch (error) {
+    console.error("Error durante la creación del producto:", error);
     res.status(500).json({ message: "Error en la base de datos" });
   }
 });

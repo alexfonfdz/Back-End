@@ -154,4 +154,35 @@ app.delete('/deleteProduct/:id', async (req, res) => {
   }
 });
 
+//funcion search, regresar nomre de productos que coincidan con la busqueda
+app.post('/search', async (req, res) => {
+  try {
+    const { search } = req.body;
+    const query = `SELECT productName FROM product WHERE productName LIKE ?`;
+    const [result] = await db.query(query, [`%${search}%`]);
 
+    res.status(200).json(result);
+  } catch (error) {
+    console.error("Error during search:", error);
+    res.status(500).json({ message: "Error en la base de datos" });
+  }
+});
+
+// Función searchProductos, regresa productos que coincidan con la búsqueda
+app.post('/searchProductos', async (req, res) => {
+  try {
+    const { id } = req.body;
+    console.log("Received id:", id); // Log the received id
+
+    const query = `SELECT productPrice FROM product WHERE productName LIKE ? LIMIT 1`;
+    console.log("Query:", query); // Log the query
+
+    const [result] = await db.query(query, [id]);
+
+    console.log("Result:", result); // This should print the result
+    res.status(200).json(result);
+  } catch (error) {
+    console.error("Error during search:", error);
+    res.status(500).json({ message: "Error en la base de datos" });
+  }
+});

@@ -181,7 +181,7 @@ app.delete('/deleteProduct/:id', async (req, res) => {
 app.post('/search', async (req, res) => {
   try {
     const { search } = req.body;
-    const query = `SELECT productName FROM product WHERE productName LIKE ?`;
+    const query = `SELECT productName FROM product WHERE productName LIKE ? AND idProductType = 2;`;
     const [result] = await db.query(query, [`%${search}%`]);
 
     res.status(200).json(result);
@@ -197,7 +197,7 @@ app.post('/searchProductos', async (req, res) => {
     const { id } = req.body;
     console.log("Received id:", id); // Log the received id
 
-    const query = `SELECT productPrice FROM product WHERE productName LIKE ? LIMIT 1`;
+    const query = `SELECT productPrice FROM product WHERE productName LIKE ? AND idProductType = 2 LIMIT 1`;
     console.log("Query:", query); // Log the query
 
     const [result] = await db.query(query, [id]);

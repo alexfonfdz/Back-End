@@ -76,14 +76,14 @@ app.put('/updateInventoryAmount', async (req, res) => {
 
 //Funcion para agregar un producto
 app.post('/addInventoryProduct', async (req, res) => {
-  const { idProduct, idProductType, idUnit, productName, productAmount, minimumAmount, productPrice } = req.body;
+  const { idProductType, idUnit, productName, productAmount, minimumAmount, productPrice } = req.body;
 
-  if (!idProduct || !idProductType || !idUnit || !productName || productAmount === undefined || minimumAmount === undefined || productPrice === undefined) {
+  if ( !idProductType || !idUnit || !productName || productAmount === undefined || minimumAmount === undefined || productPrice === undefined) {
     return res.status(400).json({ message: "Faltan datos" });
   }
   try {
-    const query = `INSERT INTO product (idProduct, idProductType, idUnit, productName, productAmount, minimumAmount, productPrice) VALUES (?, ?, ?, ?, ?, ?, ?)`;
-    await db.query(query, [idProduct, idProductType, idUnit, productName, productAmount, minimumAmount, productPrice]);
+    const query = `INSERT INTO product (idProductType, idUnit, productName, productAmount, minimumAmount, productPrice) VALUES (?, ?, ?, ?, ?, ?)`;
+    await db.query(query, [idProductType, idUnit, productName, productAmount, minimumAmount, productPrice]);
 
     res.status(200).json({ message: "Producto agregado con éxito" });
 
@@ -206,6 +206,19 @@ app.post('/searchProductos', async (req, res) => {
     res.status(200).json(result);
   } catch (error) {
     console.error("Error during search:", error);
+    res.status(500).json({ message: "Error en la base de datos" });
+  }
+});
+
+app.get('/productssale', async(req,res) =>{
+  try {
+    const query = `SELECT idProduct, productName, productPrice, productAmount FROM product WHERE idProductType = 2;`;
+    const [result] = await db.query(query);
+
+    res.status(200).json(result);
+
+  } catch (error) {
+    console.error("Error al obtener productos:", error);
     res.status(500).json({ message: "Error en la base de datos" });
   }
 });
